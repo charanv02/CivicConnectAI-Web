@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b5cff">
+    <meta name="description" content="CivicConnect AI - report, track and manage civic issues.">
+
+    <title>CivicConnect AI | Smart Civic Reporting</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+        rel="stylesheet"
+    >
+
+    <link rel="stylesheet" href="style.css">
+
+    <script type="module" src="script.js"></script>
+</head>
+
+<body>
+
+<div class="page-bg"></div>
+
+<!-- =========================================================
+     NAVBAR
+========================================================= -->
+
+<header class="navbar">
+
+    <div class="nav-container">
+
+        <a class="logo" href="#home" aria-label="CivicConnect home">
+
+            <span class="logo-mark">C</span>
+
+            <span>
+                <strong>CivicConnect</strong>
+                <small>AI Civic Intelligence</small>
+            </span>
+
+        </a>
+
+        <button
+            class="mobile-menu-button"
+            id="mobileMenuButton"
+            aria-label="Open navigation"
+            aria-expanded="false"
+        >
+            ☰
+        </button>
+
+        <nav id="mainNav">
+
+            <a class="active" href="#home">
+                Home
+            </a>
+
+            <a href="#report">
+                Report Issue
+            </a>
+
+            <a href="#track">
+                Track Complaint
+            </a>
+
+            <a href="#how">
+                How It Works
+            </a>
+
+        </nav>
+
+    </div>
+
+</header>
+
+
+<main>
+
+<!-- =========================================================
+     HERO
+========================================================= -->
+
+<section class="hero" id="home">
+
+    <div class="hero-glow glow-one"></div>
+    <div class="hero-glow glow-two"></div>
+
+    <div class="hero-content">
+
+        <div class="badge">
+            <span class="pulse-dot"></span>
+            AI-POWERED CIVIC REPORTING
+        </div>
+
+        <h1>
+            Turn civic problems into
+            <span>action.</span>
+        </h1>
+
+        <p class="hero-subtitle">
+            Capture an issue, let AI classify it, attach an accurate
+            location, and create a complaint that can be tracked from
+            submission to resolution.
+        </p>
+
+        <div class="hero-actions">
+
+            <a href="#report" class="button hero-button">
+                Report an Issue
+                <span>→</span>
+            </a>
+
+            <a href="#track" class="button button-ghost">
+                Track Complaint
+            </a>
+
+        </div>
+
+        <div class="hero-stats">
+
+            <div>
+                <strong>AI</strong>
+                <span>Image classification</span>
+            </div>
+
+            <div>
+                <strong>GPS</strong>
+                <span>10-sec location capture</span>
+            </div>
+
+            <div>
+                <strong>ID</strong>
+                <span>Track every report</span>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="hero-card" aria-hidden="true">
+
+        <div class="hero-card-top">
+
+            <span class="mini-status">
+                <i></i>
+                System online
+            </span>
+
+            <span>LIVE</span>
+
+        </div>
+
+
+        <div class="city-visual">
+
+            <div class="building b1"></div>
+            <div class="building b2"></div>
+            <div class="building b3"></div>
+
+            <div class="road"></div>
+            <div class="road-line"></div>
+
+            <div class="map-pin">
+                ●
+            </div>
+
+        </div>
+
+
+        <div class="hero-card-bottom">
+
+            <div>
+                <span>AI detection</span>
+                <strong>Ready</strong>
+            </div>
+
+            <div>
+                <span>Reports</span>
+                <strong>Trackable</strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     TRUST STRIP
+========================================================= -->
+
+<section class="trust-strip">
+
+    <div>
+        <span>✓</span>
+        Browser-based AI
+    </div>
+
+    <div>
+        <span>✓</span>
+        No backend required for demo
+    </div>
+
+    <div>
+        <span>✓</span>
+        Manual or GPS location
+    </div>
+
+    <div>
+        <span>✓</span>
+        Local complaint history
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     REPORT SECTION
+========================================================= -->
+
+<section class="report-section section" id="report">
+
+    <div class="section-heading">
+
+        <span class="eyebrow">
+            01 · REPORT
+        </span>
+
+        <h2>
+            What did you find?
+        </h2>
+
+        <p>
+            Upload a clear photograph. CivicConnect AI will classify
+            the issue and recommend the responsible department.
+        </p>
+
+    </div>
+
+
+    <div class="report-card">
+
+        <!-- STEP INDICATOR -->
+
+        <div class="step-indicator">
+
+            <div class="step-item active">
+                <span>1</span>
+                <b>Photo</b>
+            </div>
+
+            <div class="step-line"></div>
+
+            <div class="step-item">
+                <span>2</span>
+                <b>AI Analysis</b>
+            </div>
+
+            <div class="step-line"></div>
+
+            <div class="step-item">
+                <span>3</span>
+                <b>Location</b>
+            </div>
+
+            <div class="step-line"></div>
+
+            <div class="step-item">
+                <span>4</span>
+                <b>Submit</b>
+            </div>
+
+        </div>
+
+
+        <!-- IMAGE UPLOAD -->
+
+        <div id="uploadBox" class="upload-box">
+
+            <div class="upload-icon">
+                ⌁
+            </div>
+
+            <div class="upload-copy">
+
+                <h3>
+                    Drop your civic issue photo here
+                </h3>
+
+                <p>
+                    or choose an image from your device
+                </p>
+
+                <span class="formats">
+                    JPG · PNG · WEBP · up to 10 MB
+                </span>
+
+            </div>
+
+
+            <input
+                type="file"
+                id="imageInput"
+                accept="image/jpeg,image/png,image/webp"
+                hidden
+            >
+
+
+            <button
+                id="chooseImageButton"
+                class="button secondary-button"
+            >
+                Choose Image
+            </button>
+
+        </div>
+
+
+        <!-- IMAGE PREVIEW -->
+
+        <div
+            id="previewContainer"
+            class="preview-container hidden"
+        >
+
+            <div class="preview-header">
+
+                <div>
+
+                    <span class="eyebrow">
+                        UPLOADED PHOTO
+                    </span>
+
+                    <h3>
+                        Review your image
+                    </h3>
+
+                </div>
+
+                <button
+                    id="removeImageButton"
+                    class="text-button danger"
+                >
+                    Remove image
+                </button>
+
+            </div>
+
+
+            <div class="preview-frame">
+
+                <img
+                    id="preview"
+                    class="preview-image"
+                    alt="Selected civic issue"
+                >
+
+            </div>
+
+
+            <button
+                id="analyzeButton"
+                class="button analyze-button"
+            >
+                ✦ Analyze with AI
+            </button>
+
+        </div>
+
+
+        <!-- AI STATUS -->
+
+        <div
+            id="statusBox"
+            class="status-box hidden"
+        >
+
+            <div class="spinner"></div>
+
+            <div class="status-content">
+
+                <div class="status-row">
+
+                    <h3 id="loadingTitle">
+                        Preparing AI...
+                    </h3>
+
+                    <strong id="progressText">
+                        Starting...
+                    </strong>
+
+                </div>
+
+                <p id="loadingText">
+                    Please wait while your image is processed in the browser.
+                </p>
+
+                <div class="progress-container">
+
+                    <div
+                        id="aiProgressBar"
+                        class="progress-bar"
+                    ></div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- ERROR -->
+
+        <div
+            id="errorBox"
+            class="error-box hidden"
+        >
+
+            <div class="error-icon">
+                !
+            </div>
+
+            <div>
+
+                <h3>
+                    Something needs attention
+                </h3>
+
+                <p id="errorText">
+                    Something went wrong.
+                </p>
+
+                <button
+                    id="retryButton"
+                    class="button retry-button"
+                >
+                    Try Again
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- AI RESULT -->
+
+        <div
+            id="resultSection"
+            class="result-section hidden"
+        >
+
+            <div class="result-heading">
+
+                <div class="success-check">
+                    ✓
+                </div>
+
+                <div>
+
+                    <span class="eyebrow">
+                        AI ANALYSIS COMPLETE
+                    </span>
+
+                    <h2>
+                        Issue intelligence
+                    </h2>
+
+                    <p>
+                        The model has identified the most likely civic issue.
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="result-grid">
+
+                <div class="result-card">
+
+                    <span class="result-label">
+                        DETECTED ISSUE
+                    </span>
+
+                    <h3 id="issueResult">
+                        -
+                    </h3>
+
+                </div>
+
+
+                <div class="result-card">
+
+                    <span class="result-label">
+                        CATEGORY
+                    </span>
+
+                    <h3 id="categoryResult">
+                        -
+                    </h3>
+
+                </div>
+
+
+                <div class="result-card">
+
+                    <span class="result-label">
+                        RESPONSIBLE DEPARTMENT
+                    </span>
+
+                    <h3 id="departmentResult">
+                        -
+                    </h3>
+
+                </div>
+
+
+                <div class="result-card">
+
+                    <span class="result-label">
+                        AI CONFIDENCE
+                    </span>
+
+                    <h3 id="confidenceResult">
+                        -
+                    </h3>
+
+                </div>
+
+            </div>
+
+
+            <!-- SEVERITY -->
+
+            <div class="severity-card">
+
+                <div>
+
+                    <span class="result-label">
+                        SEVERITY
+                    </span>
+
+                    <h3 id="severityResult">
+                        -
+                    </h3>
+
+                </div>
+
+                <div
+                    id="severityBadge"
+                    class="severity-badge"
+                >
+                    -
+                </div>
+
+            </div>
+
+
+            <!-- DESCRIPTION -->
+
+            <div class="description-card">
+
+                <span class="result-label">
+                    AI DESCRIPTION
+                </span>
+
+                <p id="descriptionResult">
+                    -
+                </p>
+
+            </div>
+
+
+            <!-- PREDICTIONS -->
+
+            <div class="predictions-card">
+
+                <div class="prediction-header">
+
+                    <h3>
+                        AI predictions
+                    </h3>
+
+                    <span>
+                        Top matches
+                    </span>
+
+                </div>
+
+                <div id="predictionList"></div>
+
+            </div>
+
+
+            <!-- LOCATION -->
+
+            <div class="location-card">
+
+                <div class="location-card-header">
+
+                    <div class="location-icon">
+                        ⌖
+                    </div>
+
+                    <div>
+
+                        <span class="result-label">
+                            REPORT LOCATION
+                        </span>
+
+                        <h3 id="locationResult">
+                            Choose how to add the location
+                        </h3>
+
+                    </div>
+
+                </div>
+
+
+                <p id="locationCoordinates">
+                    Automatic GPS capture has a 10-second timeout.
+                    You can also enter a location manually.
+                </p>
+
+
+                <div class="location-actions">
+
+                    <button
+                        id="getGpsButton"
+                        class="button location-button"
+                    >
+                        ⌖ Use My Current Location
+                    </button>
+
+                    <button
+                        id="manualLocationButton"
+                        class="button button-light"
+                    >
+                        ＋ Add Manually
+                    </button>
+
+                </div>
+
+
+                <!-- GPS LOADING -->
+
+                <div
+                    id="gpsProgress"
+                    class="gps-progress hidden"
+                >
+
+                    <div class="gps-spinner"></div>
+
+                    <div>
+
+                        <strong>
+                            Getting your location…
+                        </strong>
+
+                        <span>
+                            Waiting up to 10 seconds for GPS.
+                        </span>
+
+                    </div>
+
+                </div>
+
+
+                <!-- MANUAL LOCATION -->
+
+                <div
+                    id="manualLocationForm"
+                    class="manual-location-form hidden"
+                >
+
+                    <label for="manualAddress">
+                        Address / landmark
+                    </label>
+
+                    <textarea
+                        id="manualAddress"
+                        rows="3"
+                        placeholder="Example: Near JNTUH Metro Station, Kukatpally, Hyderabad"
+                    ></textarea>
+
+
+                    <div class="manual-grid">
+
+                        <div>
+
+                            <label for="manualLat">
+                                Latitude
+                                <span>(optional)</span>
+                            </label>
+
+                            <input
+                                id="manualLat"
+                                type="number"
+                                step="any"
+                                placeholder="17.4933"
+                            >
+
+                        </div>
+
+
+                        <div>
+
+                            <label for="manualLng">
+                                Longitude
+                                <span>(optional)</span>
+                            </label>
+
+                            <input
+                                id="manualLng"
+                                type="number"
+                                step="any"
+                                placeholder="78.3912"
+                            >
+
+                        </div>
+
+                    </div>
+
+
+                    <button
+                        id="saveManualLocationButton"
+                        class="button"
+                    >
+                        Save Manual Location
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <!-- SUBMISSION NOTE -->
+
+            <div class="submission-note">
+
+                <span>
+                    i
+                </span>
+
+                <p>
+                    Review the AI result and location before submitting.
+                    Your complaint ID will be generated and saved in this
+                    browser for tracking.
+                </p>
+
+            </div>
+
+
+            <button
+                id="confirmButton"
+                class="button confirm-button"
+            >
+                ✓ Confirm & Submit Report
+            </button>
+
+        </div>
+
+
+        <!-- SUCCESS -->
+
+        <div
+            id="successSection"
+            class="success-section hidden"
+        >
+
+            <div class="success-icon">
+                ✓
+            </div>
+
+            <span class="eyebrow">
+                SUBMISSION SUCCESSFUL
+            </span>
+
+            <h2>
+                Report created.
+            </h2>
+
+            <p>
+                Your complaint has been recorded in this demo and can
+                now be tracked using its complaint ID.
+            </p>
+
+
+            <div class="complaint-id-box">
+
+                <span>
+                    COMPLAINT ID
+                </span>
+
+                <strong id="complaintId">
+                    CC-000000
+                </strong>
+
+                <button
+                    id="copyComplaintButton"
+                    class="copy-id-button"
+                >
+                    Copy ID
+                </button>
+
+            </div>
+
+
+            <div class="success-actions">
+
+                <a
+                    href="#track"
+                    id="trackCreatedButton"
+                    class="button"
+                >
+                    Track This Complaint
+                </a>
+
+                <button
+                    id="newReportButton"
+                    class="button button-light"
+                >
+                    Report Another Issue
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     TRACK COMPLAINT
+========================================================= -->
+
+<section
+    class="track-section section"
+    id="track"
+>
+
+    <div class="section-heading">
+
+        <span class="eyebrow">
+            02 · TRACK
+        </span>
+
+        <h2>
+            Track your complaint
+        </h2>
+
+        <p>
+            Enter the complaint ID generated after submission
+            to view its current demo status.
+        </p>
+
+    </div>
+
+
+    <div class="track-card">
+
+        <div class="track-search">
+
+            <div class="track-input-wrap">
+
+                <span>
+                    ⌕
+                </span>
+
+                <input
+                    id="trackInput"
+                    type="text"
+                    placeholder="Enter complaint ID, e.g. CC-123456"
+                    autocomplete="off"
+                >
+
+            </div>
+
+
+            <button
+                id="trackButton"
+                class="button"
+            >
+                Track Complaint
+            </button>
+
+        </div>
+
+
+        <p class="track-hint">
+            Your recent complaint IDs are stored locally in this browser.
+        </p>
+
+
+        <!-- TRACK EMPTY -->
+
+        <div
+            id="trackEmpty"
+            class="track-empty"
+        >
+
+            <div class="empty-icon">
+                ◎
+            </div>
+
+            <h3>
+                No complaint selected
+            </h3>
+
+            <p>
+                Enter a complaint ID above to view its timeline.
+            </p>
+
+        </div>
+
+
+        <!-- TRACK RESULT -->
+
+        <div
+            id="trackResult"
+            class="track-result hidden"
+        >
+
+            <div class="track-result-head">
+
+                <div>
+
+                    <span class="eyebrow">
+                        COMPLAINT
+                    </span>
+
+                    <h3 id="trackedComplaintId">
+                        CC-000000
+                    </h3>
+
+                </div>
+
+                <span
+                    id="trackedStatus"
+                    class="status-pill"
+                >
+                    Submitted
+                </span>
+
+            </div>
+
+
+            <div class="tracked-summary">
+
+                <div>
+                    <span>Issue</span>
+                    <strong id="trackedIssue">-</strong>
+                </div>
+
+                <div>
+                    <span>Department</span>
+                    <strong id="trackedDepartment">-</strong>
+                </div>
+
+                <div>
+                    <span>Location</span>
+                    <strong id="trackedLocation">-</strong>
+                </div>
+
+                <div>
+                    <span>Created</span>
+                    <strong id="trackedDate">-</strong>
+                </div>
+
+            </div>
+
+
+            <div
+                class="timeline"
+                id="complaintTimeline"
+            ></div>
+
+
+            <div class="tracking-note">
+
+                <span>
+                    AI
+                </span>
+
+                <p>
+                    This is a front-end demonstration. Complaint status
+                    is stored in local browser storage; a real deployment
+                    would connect these records to a secure backend and
+                    municipal workflow.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     HOW IT WORKS
+========================================================= -->
+
+<section
+    class="how-section section"
+    id="how"
+>
+
+    <div class="section-heading">
+
+        <span class="eyebrow">
+            03 · WORKFLOW
+        </span>
+
+        <h2>
+            From photo to action
+        </h2>
+
+        <p>
+            A simple workflow designed to reduce the friction between
+            citizens and civic services.
+        </p>
+
+    </div>
+
+
+    <div class="steps">
+
+        <div class="step">
+
+            <div class="step-number">
+                01
+            </div>
+
+            <span class="step-icon">
+                ▧
+            </span>
+
+            <h3>
+                Capture
+            </h3>
+
+            <p>
+                Upload a clear photograph of the problem you found.
+            </p>
+
+        </div>
+
+
+        <div class="step">
+
+            <div class="step-number">
+                02
+            </div>
+
+            <span class="step-icon">
+                ✦
+            </span>
+
+            <h3>
+                Analyze
+            </h3>
+
+            <p>
+                Browser-based AI compares the image with civic issue categories.
+            </p>
+
+        </div>
+
+
+        <div class="step">
+
+            <div class="step-number">
+                03
+            </div>
+
+            <span class="step-icon">
+                ⌖
+            </span>
+
+            <h3>
+                Locate
+            </h3>
+
+            <p>
+                Use GPS with a 10-second timeout or provide the location manually.
+            </p>
+
+        </div>
+
+
+        <div class="step">
+
+            <div class="step-number">
+                04
+            </div>
+
+            <span class="step-icon">
+                ✓
+            </span>
+
+            <h3>
+                Track
+            </h3>
+
+            <p>
+                Receive a complaint ID and use it to follow the report timeline.
+            </p>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- =========================================================
+     FEATURES
+========================================================= -->
+
+<section class="feature-section section">
+
+    <div class="feature-panel">
+
+        <div>
+
+            <span class="eyebrow">
+                CIVICCONNECT AI
+            </span>
+
+            <h2>
+                One interface for reporting,
+                intelligence and follow-up.
+            </h2>
+
+        </div>
+
+
+        <div class="feature-list">
+
+            <div>
+
+                <span>
+                    01
+                </span>
+
+                <p>
+                    <strong>
+                        AI-assisted classification
+                    </strong>
+                    <br>
+                    Turns an image into a structured civic issue.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    02
+                </span>
+
+                <p>
+                    <strong>
+                        Flexible location capture
+                    </strong>
+                    <br>
+                    GPS or manual address entry, depending on what
+                    the citizen can provide.
+                </p>
+
+            </div>
+
+
+            <div>
+
+                <span>
+                    03
+                </span>
+
+                <p>
+                    <strong>
+                        Traceable complaint IDs
+                    </strong>
+                    <br>
+                    Every submission gets a unique identifier
+                    for the tracking interface.
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+</main>
+
+
+<!-- =========================================================
+     FOOTER
+========================================================= -->
+
+<footer>
+
+    <div class="footer-content">
+
+        <div class="footer-brand">
+
+            <div class="logo">
+
+                <span class="logo-mark">
+                    C
+                </span>
+
+                <span>
+
+                    <strong>
+                        CivicConnect
+                    </strong>
+
+                    <small>
+                        AI Civic Intelligence
+                    </small>
+
+                </span>
+
+            </div>
+
+            <p>
+                Technology for better communities.
+            </p>
+
+        </div>
+
+
+        <div class="footer-meta">
+
+            <span>
+                Built for civic innovation
+            </span>
+
+            <span>
+                ·
+            </span>
+
+            <span>
+                Browser AI demo
+            </span>
+
+        </div>
+
+    </div>
+
+</footer>
+
+
+<!-- BACK TO TOP -->
+
+<button
+    id="backToTop"
+    class="back-to-top"
+    aria-label="Back to top"
+>
+    ↑
+</button>
+
+</body>
+</html>
