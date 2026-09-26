@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0b5cff">
-    <meta name="description" content="CivicConnect AI - report, track and manage civic issues.">
+    <meta name="description" content="CivicConnectAI - report, track and manage civic issues.">
 
     <title>CivicConnect AI | Smart Civic Reporting</title>
 
@@ -69,6 +69,10 @@
 
             <a href="#how">
                 How It Works
+            </a>
+
+            <a href="#authority">
+                Authority
             </a>
 
         </nav>
@@ -369,6 +373,70 @@
                 class="button analyze-button"
             >
                 ✦ Analyze with AI
+            </button>
+
+        </div>
+
+
+        <!-- METADATA / AI-ORIGIN INSPECTION -->
+
+        <div
+            id="metadataBox"
+            class="metadata-box hidden"
+        >
+
+            <div class="metadata-header">
+
+                <div class="metadata-title-wrap">
+
+                    <div class="metadata-icon">
+                        ◈
+                    </div>
+
+                    <div>
+
+                        <span class="result-label">
+                            METADATA INSPECTION
+                        </span>
+
+                        <h3>
+                            AI-origin signal check
+                        </h3>
+
+                    </div>
+
+                </div>
+
+                <span
+                    id="metadataBadge"
+                    class="metadata-badge"
+                >
+                    Scanning…
+                </span>
+
+            </div>
+
+            <p id="metadataVerdict" class="metadata-verdict">
+                Inspecting the image metadata…
+            </p>
+
+            <div
+                id="metadataDetails"
+                class="metadata-details"
+            ></div>
+
+            <div class="metadata-disclaimer">
+                Metadata inspection can identify AI-related provenance or generator
+                markers when they are present. Missing or altered metadata cannot
+                prove that a photo is authentic or AI-generated.
+            </div>
+
+            <button
+                id="recheckMetadataButton"
+                class="button button-light metadata-recheck"
+                type="button"
+            >
+                Recheck Metadata
             </button>
 
         </div>
@@ -740,6 +808,15 @@
             </div>
 
 
+            <!-- DUPLICATE REPORT DETECTION -->
+
+            <div
+                id="duplicateAlert"
+                class="duplicate-alert hidden"
+                aria-live="polite"
+            ></div>
+
+
             <!-- SUBMISSION NOTE -->
 
             <div class="submission-note">
@@ -984,6 +1061,18 @@
             ></div>
 
 
+            <div
+                id="trackedDuplicateInfo"
+                class="tracked-duplicate-info hidden"
+            ></div>
+
+
+            <div
+                id="trackedStatusHistory"
+                class="tracked-status-history hidden"
+            ></div>
+
+
             <div class="tracking-note">
 
                 <span>
@@ -1006,6 +1095,260 @@
 </section>
 
 
+
+<!-- =========================================================
+     AUTHORITY PORTAL
+========================================================= -->
+
+<section
+    class="authority-section section"
+    id="authority"
+>
+
+    <div class="section-heading">
+
+        <span class="eyebrow">
+            03 · AUTHORITY
+        </span>
+
+        <h2>
+            Municipal authority portal
+        </h2>
+
+        <p>
+            Review reports, detect repeated complaints and update the issue
+            status. This front-end demo stores authority changes in browser storage.
+        </p>
+
+    </div>
+
+
+    <div class="authority-card">
+
+        <!-- AUTHORITY LOGIN -->
+
+        <div
+            id="authorityLoginView"
+            class="authority-login-view"
+        >
+
+            <div class="authority-login-copy">
+
+                <div class="authority-lock-icon">
+                    ✓
+                </div>
+
+                <span class="eyebrow">
+                    SECURE DEMO ACCESS
+                </span>
+
+                <h3>
+                    Authority sign in
+                </h3>
+
+                <p>
+                    Use the demo credentials to access the complaint management
+                    dashboard.
+                </p>
+
+            </div>
+
+
+            <form
+                id="authorityLoginForm"
+                class="authority-login-form"
+            >
+
+                <label for="authorityUsername">
+                    Username
+                </label>
+
+                <input
+                    id="authorityUsername"
+                    type="text"
+                    autocomplete="username"
+                    placeholder="authority"
+                    required
+                >
+
+
+                <label for="authorityPassword">
+                    Password
+                </label>
+
+                <input
+                    id="authorityPassword"
+                    type="password"
+                    autocomplete="current-password"
+                    placeholder="civic@123"
+                    required
+                >
+
+
+                <button
+                    id="authorityLoginButton"
+                    class="button"
+                    type="submit"
+                >
+                    Sign in to dashboard
+                </button>
+
+                <p
+                    id="authorityLoginError"
+                    class="authority-login-error hidden"
+                >
+                    Invalid demo credentials.
+                </p>
+
+                <div class="authority-demo-note">
+                    Demo credentials: <strong>authority</strong> /
+                    <strong>civic@123</strong>
+                </div>
+
+            </form>
+
+        </div>
+
+
+        <!-- AUTHORITY DASHBOARD -->
+
+        <div
+            id="authorityDashboard"
+            class="authority-dashboard hidden"
+        >
+
+            <div class="authority-dashboard-head">
+
+                <div>
+
+                    <span class="eyebrow">
+                        AUTHORITY DASHBOARD
+                    </span>
+
+                    <h3>
+                        Complaint command center
+                    </h3>
+
+                    <p>
+                        Update statuses below. Changes immediately appear in complaint tracking.
+                    </p>
+
+                </div>
+
+                <button
+                    id="authorityLogoutButton"
+                    class="button button-light"
+                    type="button"
+                >
+                    Log out
+                </button>
+
+            </div>
+
+
+            <div
+                id="authorityStats"
+                class="authority-stats"
+            ></div>
+
+
+            <div class="authority-controls">
+
+                <div class="authority-search">
+
+                    <span>
+                        ⌕
+                    </span>
+
+                    <input
+                        id="authoritySearch"
+                        type="search"
+                        placeholder="Search complaint ID, issue or location"
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <select
+                    id="authorityStatusFilter"
+                    class="authority-filter"
+                    aria-label="Filter complaints by status"
+                >
+                    <option value="All">All statuses</option>
+                    <option value="Submitted">Submitted</option>
+                    <option value="Under Review">Under Review</option>
+                    <option value="Assigned">Assigned</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+
+            </div>
+
+
+            <div class="all-statuses-header">
+
+                <div>
+
+                    <span class="result-label">
+                        ALL STATUSES
+                    </span>
+
+                    <h4>
+                        Reports in this browser
+                    </h4>
+
+                </div>
+
+                <span
+                    id="authorityResultsCount"
+                    class="authority-count"
+                >
+                    0 reports
+                </span>
+
+            </div>
+
+
+            <div
+                id="authorityComplaintList"
+                class="authority-complaint-list"
+            ></div>
+
+
+            <div
+                id="authorityEmpty"
+                class="authority-empty hidden"
+            >
+                <div class="empty-icon">
+                    ◎
+                </div>
+
+                <h3>
+                    No complaints match this filter
+                </h3>
+
+                <p>
+                    Submitted reports will appear here automatically.
+                </p>
+            </div>
+
+
+            <div class="authority-security-note">
+                <strong>Demo note:</strong> this login is browser-only and is not
+                a production authentication system. A real deployment should use
+                server-side identity verification, role-based access control and
+                a secure database.
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
 <!-- =========================================================
      HOW IT WORKS
 ========================================================= -->
@@ -1018,7 +1361,7 @@
     <div class="section-heading">
 
         <span class="eyebrow">
-            03 · WORKFLOW
+            04 · WORKFLOW
         </span>
 
         <h2>
