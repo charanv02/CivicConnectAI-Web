@@ -194,6 +194,69 @@ const mainNav =
 const backToTop =
     $("backToTop");
 
+const metadataBox =
+    $("metadataBox");
+
+const metadataBadge =
+    $("metadataBadge");
+
+const metadataVerdict =
+    $("metadataVerdict");
+
+const metadataDetails =
+    $("metadataDetails");
+
+const recheckMetadataButton =
+    $("recheckMetadataButton");
+
+const duplicateAlert =
+    $("duplicateAlert");
+
+const trackedDuplicateInfo =
+    $("trackedDuplicateInfo");
+
+const trackedStatusHistory =
+    $("trackedStatusHistory");
+
+const authorityLoginView =
+    $("authorityLoginView");
+
+const authorityLoginForm =
+    $("authorityLoginForm");
+
+const authorityUsername =
+    $("authorityUsername");
+
+const authorityPassword =
+    $("authorityPassword");
+
+const authorityLoginError =
+    $("authorityLoginError");
+
+const authorityLogoutButton =
+    $("authorityLogoutButton");
+
+const authorityDashboard =
+    $("authorityDashboard");
+
+const authorityStats =
+    $("authorityStats");
+
+const authoritySearch =
+    $("authoritySearch");
+
+const authorityStatusFilter =
+    $("authorityStatusFilter");
+
+const authorityResultsCount =
+    $("authorityResultsCount");
+
+const authorityComplaintList =
+    $("authorityComplaintList");
+
+const authorityEmpty =
+    $("authorityEmpty");
+
 
 /* =========================================================
    VARIABLES
@@ -213,6 +276,14 @@ let currentLocation = null;
 
 let latestComplaintId = null;
 
+let currentMetadataAnalysis = null;
+
+let currentFileHash = null;
+
+let metadataInspectionToken = 0;
+
+let metadataInspectionPromise = null;
+
 
 /* =========================================================
    LOCAL STORAGE KEY
@@ -220,6 +291,119 @@ let latestComplaintId = null;
 
 const STORAGE_KEY =
     "civicconnect_complaints_v2";
+
+const AUTH_SESSION_KEY =
+    "civicconnect_authority_session_v1";
+
+const AUTH_CREDENTIALS = {
+    username: "authority",
+    password: "civic@123"
+};
+
+const AUTHORITY_STATUSES = [
+    "Submitted",
+    "Under Review",
+    "Assigned",
+    "In Progress",
+    "Resolved",
+    "Rejected"
+];
+
+const STATUS_STAGE = {
+    "Submitted": 0,
+    "Under Review": 1,
+    "Assigned": 2,
+    "In Progress": 3,
+    "Resolved": 4,
+    "Rejected": 1
+};
+
+const AI_METADATA_GENERATORS = [
+    {
+        name: "Stable Diffusion",
+        patterns: [
+            "stable diffusion",
+            "stable-diffusion",
+            "stablediffusion"
+        ]
+    },
+    {
+        name: "Midjourney",
+        patterns: [
+            "midjourney"
+        ]
+    },
+    {
+        name: "DALL-E",
+        patterns: [
+            "dall-e",
+            "dall·e",
+            "dalle"
+        ]
+    },
+    {
+        name: "Adobe Firefly",
+        patterns: [
+            "adobe firefly",
+            "firefly"
+        ]
+    },
+    {
+        name: "ComfyUI",
+        patterns: [
+            "comfyui"
+        ]
+    },
+    {
+        name: "Automatic1111",
+        patterns: [
+            "automatic1111",
+            "automatic1111"
+        ]
+    },
+    {
+        name: "InvokeAI",
+        patterns: [
+            "invokeai"
+        ]
+    },
+    {
+        name: "Leonardo AI",
+        patterns: [
+            "leonardo.ai",
+            "leonardo ai"
+        ]
+    },
+    {
+        name: "Ideogram",
+        patterns: [
+            "ideogram"
+        ]
+    },
+    {
+        name: "C2PA AI provenance",
+        patterns: [
+            "trainedalgorithmicmedia",
+            "trained algorithmic media"
+        ]
+    }
+];
+
+const AI_METADATA_MARKERS = [
+    "negative prompt",
+    "cfg scale",
+    "steps:",
+    "sampler:",
+    "model hash",
+    "clip skip",
+    "seed:",
+    "workflow",
+    "generation data",
+    "ai generated",
+    "ai-generated",
+    "generative fill",
+    "generative expand"
+];
 
 
 /* =========================================================
@@ -481,15 +665,193 @@ function getComplaints() {
 
     try {
 
-        return JSON.parse(
-            localStorage.getItem(STORAGE_KEY) || "{}"
+        const parsed =
+            JSON.parse(
+                localStorage.getItem(STORAGE_KEY) || "{}"
+            );
+
+        if (
+            !parsed ||
+            typeof parsed !== "object" ||
+            Array.isArray(parsed)
+        ) {
+
+            return {};
+
+        }
+
+
+        Object.values(parsed).forEach(
+            normalizeComplaintRecord
         );
+
+
+        return parsed;
 
     } catch {
 
         return {};
 
     }
+
+}
+
+
+function normalizeComplaintRecord(
+    complaint
+) {
+
+    if (
+        !complaint ||
+        typeof complaint !== "object"
+    ) {
+
+        return complaint;
+
+    }
+
+
+    complaint.status =
+        AUTHORITY_STATUSES.includes(
+            complaint.status
+        )
+            ? complaint.status
+            : "Submitted";
+
+
+    if (
+        !Array.isArray(
+            complaint.timeline
+        )
+        ||
+        complaint.timeline.length === 0
+    ) {
+
+        complaint.timeline =
+            createDefaultTimeline(
+                complaint.createdAt ||
+                Date.now(),
+                complaint.department ||
+                "the responsible department"
+            );
+
+    }
+
+
+    if (
+        !Array.isArray(
+            complaint.statusHistory
+        )
+    ) {
+
+        complaint.statusHistory = [
+            {
+                status:
+                    complaint.status,
+
+                time:
+                    complaint.createdAt ||
+                    Date.now(),
+
+                actor:
+                    "System"
+            }
+        ];
+
+    }
+
+
+    if (
+        !Array.isArray(
+            complaint.duplicateMatches
+        )
+    ) {
+
+        complaint.duplicateMatches = [];
+
+    }
+
+
+    complaint.hasPotentialDuplicate =
+        Boolean(
+            complaint.hasPotentialDuplicate ||
+            complaint.duplicateMatches.length
+        );
+
+
+    return complaint;
+
+}
+
+
+function createDefaultTimeline(
+    createdAt,
+    department
+) {
+
+    return [
+
+        {
+            title:
+                "Complaint submitted",
+
+            description:
+                "Your report has been successfully created.",
+
+            time:
+                createdAt,
+
+            done:
+                true
+
+        },
+
+        {
+            title:
+                "Department review",
+
+            description:
+                `The report is ready for review by ${department}.`,
+
+            time:
+                null,
+
+            done:
+                false
+
+        },
+
+        {
+            title:
+                "Action in progress",
+
+            description:
+                "Updates will appear here when the report progresses.",
+
+            time:
+                null,
+
+            done:
+                false
+
+        },
+
+        {
+            title:
+                "Resolved",
+
+            description:
+                "The civic issue has been marked as resolved.",
+
+            time:
+                null,
+
+            done:
+                false
+
+        }
+
+    ];
 
 }
 
@@ -794,6 +1156,35 @@ function processSelectedFile(file) {
 
     currentLocation =
         null;
+
+    currentMetadataAnalysis =
+        null;
+
+    currentFileHash =
+        null;
+
+    metadataInspectionToken += 1;
+
+    metadataInspectionPromise =
+        null;
+
+    resetMetadataUI();
+
+    currentMetadataAnalysis =
+        null;
+
+    currentFileHash =
+        null;
+
+    metadataInspectionPromise =
+        null;
+
+    resetMetadataUI();
+
+    metadataInspectionPromise =
+        inspectImageMetadata(
+            file
+        );
 
 
     updateStepIndicator(1);
@@ -1562,6 +1953,8 @@ function getLocation() {
             locationCoordinates.textContent =
                 `Latitude: ${latitude.toFixed(6)} · Longitude: ${longitude.toFixed(6)} · Accuracy: approximately ${Math.round(position.coords.accuracy)} m`;
 
+            refreshDuplicateDetection();
+
 
             updateStepIndicator(3);
 
@@ -1820,7 +2213,24 @@ confirmButton?.addEventListener(
 );
 
 
-function createComplaint() {
+async function createComplaint() {
+
+    if (
+        metadataInspectionPromise
+    ) {
+
+        try {
+
+            await metadataInspectionPromise;
+
+        } catch {
+
+            /* Metadata is informational; submission can continue. */
+
+        }
+
+    }
+
 
     if (!currentAIResult) {
 
@@ -1850,12 +2260,26 @@ function createComplaint() {
     }
 
 
-    const id =
-        generateComplaintId();
-
-
     const createdAt =
         Date.now();
+
+    const duplicateMatches =
+        findPotentialDuplicateComplaints({
+            issue:
+                currentAIResult.issue,
+
+            category:
+                currentAIResult.category,
+
+            location:
+                currentLocation,
+
+            fileHash:
+                currentFileHash
+        });
+
+    const id =
+        generateComplaintId();
 
 
     const complaint = {
@@ -1896,9 +2320,69 @@ function createComplaint() {
 
             currentLocation,
 
+        metadataAnalysis:
+
+            currentMetadataAnalysis
+                ? { ...currentMetadataAnalysis }
+                : null,
+
+        fileHash:
+
+            currentFileHash,
+
+        hasPotentialDuplicate:
+
+            duplicateMatches.length > 0,
+
+        duplicateMatches:
+
+            duplicateMatches
+                .slice(0, 5)
+                .map(
+                    (match) => ({
+                        id:
+                            match.id,
+
+                        issue:
+                            match.issue,
+
+                        status:
+                            match.status,
+
+                        createdAt:
+                            match.createdAt,
+
+                        reason:
+                            match.reason,
+
+                        score:
+                            match.score
+                    })
+                ),
+
+        duplicateOf:
+
+            duplicateMatches[0]?.id ||
+            null,
+
         status:
 
             "Submitted",
+
+        statusHistory: [
+
+            {
+                status:
+                    "Submitted",
+
+                time:
+                    createdAt,
+
+                actor:
+                    "Citizen"
+            }
+
+        ],
 
         timeline: [
 
@@ -1985,6 +2469,14 @@ function createComplaint() {
     saveComplaints(
         complaints
     );
+
+    if (
+        isAuthorityLoggedIn()
+    ) {
+
+        renderAuthorityDashboard();
+
+    }
 
 
     latestComplaintId =
@@ -2267,6 +2759,12 @@ function renderTrackedComplaint(
         );
 
 
+    complaint =
+        normalizeComplaintRecord(
+            complaint
+        );
+
+
     complaintTimeline.innerHTML =
         "";
 
@@ -2340,6 +2838,15 @@ function renderTrackedComplaint(
             );
 
         }
+    );
+
+
+    renderTrackedDuplicateInfo(
+        complaint
+    );
+
+    renderTrackedStatusHistory(
+        complaint
     );
 
 }
@@ -2452,4 +2959,2455 @@ console.log(
 
 console.log(
     "GPS timeout: 10 seconds"
+);
+
+/* =========================================================
+   METADATA / AI-ORIGIN INSPECTION
+========================================================= */
+
+/*
+    This is a metadata-based provenance indicator, not a forensic
+    AI-image detector. It intentionally avoids claiming that an image
+    is human-made merely because AI metadata is absent.
+*/
+
+function resetMetadataUI() {
+
+    metadataBox?.classList.add(
+        "hidden"
+    );
+
+    if (metadataBadge) {
+
+        metadataBadge.textContent =
+            "Scanning…";
+
+        metadataBadge.className =
+            "metadata-badge";
+
+    }
+
+    if (metadataVerdict) {
+
+        metadataVerdict.textContent =
+            "Inspecting the image metadata…";
+
+    }
+
+    if (metadataDetails) {
+
+        metadataDetails.innerHTML =
+            "";
+
+    }
+
+}
+
+
+recheckMetadataButton?.addEventListener(
+    "click",
+    () => {
+
+        if (selectedFile) {
+
+            inspectImageMetadata(
+                selectedFile
+            );
+
+        }
+
+    }
+);
+
+
+async function inspectImageMetadata(
+    file
+) {
+
+    const token =
+        ++metadataInspectionToken;
+
+
+    metadataBox?.classList.remove(
+        "hidden"
+    );
+
+    if (metadataBadge) {
+
+        metadataBadge.textContent =
+            "Scanning…";
+
+        metadataBadge.className =
+            "metadata-badge metadata-scanning";
+
+    }
+
+    if (metadataVerdict) {
+
+        metadataVerdict.textContent =
+            "Reading EXIF, XMP and file-provenance markers…";
+
+    }
+
+
+    try {
+
+        const buffer =
+            await file.arrayBuffer();
+
+
+        if (
+            token !==
+            metadataInspectionToken
+        ) {
+
+            return;
+
+        }
+
+
+        currentFileHash =
+            await sha256Hex(
+                buffer
+            );
+
+
+        const analysis =
+            analyzeImageMetadataBuffer(
+                file,
+                buffer
+            );
+
+
+        analysis.fileHash =
+            currentFileHash;
+
+
+        analysis.fileName =
+            file.name;
+
+
+        analysis.fileType =
+            file.type ||
+            "Unknown";
+
+
+        analysis.fileSize =
+            file.size;
+
+
+        analysis.dimensions =
+            `${preview.naturalWidth || "?"} × ${preview.naturalHeight || "?"}`;
+
+
+        currentMetadataAnalysis =
+            analysis;
+
+
+        renderMetadataAnalysis(
+            analysis
+        );
+
+
+        refreshDuplicateDetection();
+
+    } catch (error) {
+
+        console.warn(
+            "Metadata inspection failed:",
+            error
+        );
+
+
+        currentMetadataAnalysis = {
+
+            verdict:
+                "Metadata inspection unavailable",
+
+            confidence:
+                "Low",
+
+            signals:
+                [],
+
+            metadataTypes:
+                [],
+
+            fileName:
+                file.name,
+
+            fileType:
+                file.type ||
+                "Unknown",
+
+            fileSize:
+                file.size,
+
+            error:
+                true
+
+        };
+
+
+        renderMetadataAnalysis(
+            currentMetadataAnalysis
+        );
+
+    }
+
+}
+
+
+async function sha256Hex(
+    buffer
+) {
+
+    if (
+        !window.crypto?.subtle
+    ) {
+
+        return null;
+
+    }
+
+
+    const digest =
+        await crypto.subtle.digest(
+            "SHA-256",
+            buffer
+        );
+
+
+    return Array
+        .from(
+            new Uint8Array(
+                digest
+            )
+        )
+        .map(
+            (byte) =>
+                byte
+                    .toString(16)
+                    .padStart(2, "0")
+        )
+        .join("");
+
+}
+
+
+function analyzeImageMetadataBuffer(
+    file,
+    buffer
+) {
+
+    const bytes =
+        new Uint8Array(
+            buffer
+        );
+
+
+    const metadataTypes =
+        detectMetadataBlocks(
+            file,
+            bytes
+        );
+
+
+    const sampleText =
+        extractMetadataText(
+            bytes
+        )
+            .toLowerCase();
+
+
+    const generatorMatches = [];
+
+
+    AI_METADATA_GENERATORS.forEach(
+        (generator) => {
+
+            const found =
+                generator.patterns.some(
+                    (pattern) =>
+                        sampleText.includes(
+                            pattern
+                        )
+                );
+
+
+            if (found) {
+
+                generatorMatches.push(
+                    generator.name
+                );
+
+            }
+
+        }
+    );
+
+
+    const markerMatches =
+        AI_METADATA_MARKERS.filter(
+            (marker) =>
+                sampleText.includes(
+                    marker
+                )
+        );
+
+
+    const provenanceMatches = [];
+
+    [
+        "c2pa",
+        "content credentials",
+        "digital sourcetype",
+        "trainedalgorithmicmedia"
+    ].forEach(
+        (marker) => {
+
+            if (
+                sampleText.includes(
+                    marker
+                )
+            ) {
+
+                provenanceMatches.push(
+                    marker
+                );
+
+            }
+
+        }
+    );
+
+
+    const cameraSignals =
+        [
+            "make",
+            "model",
+            "lensmodel",
+            "datetimeoriginal",
+            "exposuretime",
+            "fnumber",
+            "focallength"
+        ]
+            .filter(
+                (marker) =>
+                    sampleText.includes(
+                        marker
+                    )
+            );
+
+
+    let verdict =
+        "No AI-generation metadata detected";
+
+    let confidence =
+        "Low";
+
+    let badgeClass =
+        "metadata-not-detected";
+
+
+    if (
+        generatorMatches.length
+    ) {
+
+        verdict =
+            `AI-generation metadata detected: ${generatorMatches.join(", ")}`;
+
+        confidence =
+            "High";
+
+        badgeClass =
+            "metadata-ai";
+
+    } else if (
+        markerMatches.length >=
+        2 ||
+        provenanceMatches.length
+    ) {
+
+        verdict =
+            "Possible AI-generation metadata detected; manual review is recommended.";
+
+        confidence =
+            "Medium";
+
+        badgeClass =
+            "metadata-possible";
+
+    }
+
+
+    return {
+
+        verdict:
+            verdict,
+
+        confidence:
+            confidence,
+
+        badgeClass:
+            badgeClass,
+
+        generatorMatches:
+            generatorMatches,
+
+        markerMatches:
+            markerMatches,
+
+        provenanceMatches:
+            provenanceMatches,
+
+        cameraSignals:
+            cameraSignals,
+
+        metadataTypes:
+            metadataTypes,
+
+        signals:
+            [
+                ...generatorMatches,
+                ...markerMatches,
+                ...provenanceMatches
+            ]
+
+    };
+
+}
+
+
+function renderMetadataAnalysis(
+    analysis
+) {
+
+    if (!metadataBox) {
+
+        return;
+
+    }
+
+
+    metadataBox.classList.remove(
+        "hidden"
+    );
+
+
+    metadataBadge.textContent =
+        analysis.confidence === "High"
+            ? "AI signal"
+            : analysis.confidence === "Medium"
+                ? "Review"
+                : "No AI signal";
+
+
+    metadataBadge.className =
+        `metadata-badge ${
+            analysis.badgeClass ||
+            "metadata-not-detected"
+        }`;
+
+
+    metadataVerdict.textContent =
+        analysis.verdict;
+
+
+    const details = [
+
+        [
+            "File",
+            analysis.fileName || "-"
+        ],
+
+        [
+            "Type",
+            analysis.fileType || "-"
+        ],
+
+        [
+            "Size",
+            formatBytes(
+                analysis.fileSize || 0
+            )
+        ],
+
+        [
+            "Dimensions",
+            analysis.dimensions || "-"
+        ],
+
+        [
+            "Metadata blocks",
+            analysis.metadataTypes?.length
+                ? analysis.metadataTypes.join(", ")
+                : "No standard provenance blocks detected"
+        ],
+
+        [
+            "Generator markers",
+            analysis.generatorMatches?.length
+                ? analysis.generatorMatches.join(", ")
+                : "None found"
+        ]
+
+    ];
+
+
+    metadataDetails.innerHTML =
+        details
+            .map(
+                ([label, value]) => `
+                    <div class="metadata-detail">
+                        <span>${escapeHTML(label)}</span>
+                        <strong>${escapeHTML(String(value))}</strong>
+                    </div>
+                `
+            )
+            .join("");
+
+
+}
+
+
+function formatBytes(
+    bytes
+) {
+
+    if (
+        !Number.isFinite(bytes) ||
+        bytes <= 0
+    ) {
+
+        return "Unknown";
+
+    }
+
+
+    const units = [
+        "B",
+        "KB",
+        "MB",
+        "GB"
+    ];
+
+    const index =
+        Math.min(
+            Math.floor(
+                Math.log(bytes) /
+                Math.log(1024)
+            ),
+            units.length - 1
+        );
+
+
+    return `${(
+        bytes /
+        (1024 ** index)
+    ).toFixed(
+        index === 0
+            ? 0
+            : 1
+    )} ${units[index]}`;
+
+}
+
+
+function extractMetadataText(
+    bytes
+) {
+
+    const maxFront =
+        Math.min(
+            bytes.length,
+            2_500_000
+        );
+
+    const start =
+        bytes.slice(
+            0,
+            maxFront
+        );
+
+    const endStart =
+        Math.max(
+            maxFront,
+            bytes.length -
+            750_000
+        );
+
+    const end =
+        bytes.slice(
+            endStart
+        );
+
+
+    const merged =
+        new Uint8Array(
+            start.length +
+            end.length
+        );
+
+
+    merged.set(
+        start,
+        0
+    );
+
+    merged.set(
+        end,
+        start.length
+    );
+
+
+    let text = "";
+
+
+    for (
+        let i = 0;
+        i < merged.length;
+        i += 1
+    ) {
+
+        const byte =
+            merged[i];
+
+
+        text +=
+            (
+                byte === 9 ||
+                byte === 10 ||
+                byte === 13 ||
+                (
+                    byte >= 32 &&
+                    byte <= 126
+                )
+            )
+                ? String.fromCharCode(
+                    byte
+                )
+                : " ";
+
+    }
+
+
+    return text;
+
+}
+
+
+function detectMetadataBlocks(
+    file,
+    bytes
+) {
+
+    const types =
+        new Set();
+
+
+    const type =
+        (
+            file.type ||
+            ""
+        ).toLowerCase();
+
+
+    const text =
+        extractMetadataText(
+            bytes
+        );
+
+
+    if (
+        type === "image/jpeg" ||
+        (
+            bytes[0] === 0xFF &&
+            bytes[1] === 0xD8
+        )
+    ) {
+
+        if (
+            text.includes(
+                "Exif"
+            )
+        ) {
+
+            types.add(
+                "EXIF"
+            );
+
+        }
+
+        if (
+            text.includes(
+                "http://ns.adobe.com/xap/1.0/"
+            ) ||
+            text.includes(
+                "XMP"
+            )
+        ) {
+
+            types.add(
+                "XMP"
+            );
+
+        }
+
+        if (
+            text.includes(
+                "Photoshop"
+            ) ||
+            text.includes(
+                "8BIM"
+            )
+        ) {
+
+            types.add(
+                "Photoshop/IPTC"
+            );
+
+        }
+
+    }
+
+
+    if (
+        type === "image/png" ||
+        (
+            bytes[0] === 0x89 &&
+            bytes[1] === 0x50 &&
+            bytes[2] === 0x4E &&
+            bytes[3] === 0x47
+        )
+    ) {
+
+        const chunkText =
+            [
+                "tEXt",
+                "zTXt",
+                "iTXt",
+                "eXIf"
+            ]
+                .filter(
+                    (chunk) =>
+                        text.includes(
+                            chunk
+                        )
+                );
+
+
+        if (
+            chunkText.length
+        ) {
+
+            chunkText.forEach(
+                (chunk) =>
+                    types.add(
+                        `PNG ${chunk}`
+                    )
+            );
+
+        }
+
+    }
+
+
+    if (
+        type === "image/webp" ||
+        (
+            bytes[0] === 0x52 &&
+            bytes[1] === 0x49 &&
+            bytes[2] === 0x46 &&
+            bytes[3] === 0x46
+        )
+    ) {
+
+        [
+            "EXIF",
+            "XMP ",
+            "ICCP",
+            "IPTC"
+        ]
+            .forEach(
+                (chunk) => {
+
+                    if (
+                        text.includes(
+                            chunk
+                        )
+                    ) {
+
+                        types.add(
+                            `WebP ${chunk.trim()}`
+                        );
+
+                    }
+
+                }
+            );
+
+    }
+
+
+    return Array.from(
+        types
+    );
+
+}
+
+
+/* =========================================================
+   DUPLICATE REPORT DETECTION
+========================================================= */
+
+function refreshDuplicateDetection() {
+
+    if (
+        !duplicateAlert
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !currentAIResult ||
+        !currentLocation
+    ) {
+
+        duplicateAlert.classList.add(
+            "hidden"
+        );
+
+        return;
+
+    }
+
+
+    const matches =
+        findPotentialDuplicateComplaints({
+            issue:
+                currentAIResult.issue,
+
+            category:
+                currentAIResult.category,
+
+            location:
+                currentLocation,
+
+            fileHash:
+                currentFileHash
+        });
+
+
+    renderDuplicateAlert(
+        matches
+    );
+
+}
+
+
+function findPotentialDuplicateComplaints(
+    candidate
+) {
+
+    const complaints =
+        getComplaints();
+
+
+    return Object
+        .values(
+            complaints
+        )
+        .map(
+            (complaint) => {
+
+                const match =
+                    calculateDuplicateMatch(
+                        candidate,
+                        complaint
+                    );
+
+
+                return match
+                    ? {
+                        ...match,
+                        id:
+                            complaint.id,
+                        issue:
+                            complaint.issue,
+                        status:
+                            complaint.status,
+                        createdAt:
+                            complaint.createdAt
+                    }
+                    : null;
+
+            }
+        )
+        .filter(Boolean)
+        .sort(
+            (a, b) =>
+                b.score -
+                a.score
+        );
+
+}
+
+
+function calculateDuplicateMatch(
+    candidate,
+    complaint
+) {
+
+    if (
+        !complaint
+    ) {
+
+        return null;
+
+    }
+
+
+    let score =
+        0;
+
+    const reasons = [];
+
+
+    if (
+        candidate.fileHash &&
+        complaint.fileHash &&
+        candidate.fileHash ===
+            complaint.fileHash
+    ) {
+
+        score =
+            Math.max(
+                score,
+                100
+            );
+
+        reasons.push(
+            "Identical image file"
+        );
+
+    }
+
+
+    const sameIssue =
+        candidate.issue &&
+        complaint.issue &&
+        candidate.issue
+            .toLowerCase() ===
+            complaint.issue
+                .toLowerCase();
+
+
+    if (sameIssue) {
+
+        score =
+            Math.max(
+                score,
+                45
+            );
+
+    }
+
+
+    const sameCategory =
+        candidate.category &&
+        complaint.category &&
+        candidate.category
+            .toLowerCase() ===
+            complaint.category
+                .toLowerCase();
+
+
+    const distance =
+        calculateLocationDistanceMeters(
+            candidate.location,
+            complaint.location
+        );
+
+
+    if (
+        sameIssue &&
+        Number.isFinite(
+            distance
+        )
+    ) {
+
+        if (
+            distance <= 50
+        ) {
+
+            score =
+                Math.max(
+                    score,
+                    95
+                );
+
+            reasons.push(
+                `Same issue within ${Math.round(distance)} m`
+            );
+
+        } else if (
+            distance <= 150
+        ) {
+
+            score =
+                Math.max(
+                    score,
+                    80
+                );
+
+            reasons.push(
+                `Same issue within ${Math.round(distance)} m`
+            );
+
+        } else if (
+            distance <= 400
+        ) {
+
+            score =
+                Math.max(
+                    score,
+                    65
+                );
+
+            reasons.push(
+                `Similar issue within ${Math.round(distance)} m`
+            );
+
+        }
+
+    }
+
+
+    const sameAddress =
+        normalizeAddress(
+            candidate.location?.address
+        ) &&
+        normalizeAddress(
+            candidate.location?.address
+        ) ===
+            normalizeAddress(
+                complaint.location?.address
+            );
+
+
+    if (
+        sameIssue &&
+        sameAddress
+    ) {
+
+        score =
+            Math.max(
+                score,
+                90
+            );
+
+        reasons.push(
+            "Same issue and address"
+        );
+
+    }
+
+
+    if (
+        !score &&
+        sameCategory &&
+        Number.isFinite(
+            distance
+        ) &&
+        distance <= 100
+    ) {
+
+        score =
+            55;
+
+        reasons.push(
+            "Same category nearby"
+        );
+
+    }
+
+
+    if (
+        score <
+        65
+    ) {
+
+        return null;
+
+    }
+
+
+    const reason =
+        reasons.length
+            ? reasons.join(
+                " · "
+            )
+            : "Likely repeated report";
+
+
+    return {
+
+        score:
+            score,
+
+        reason:
+            reason
+
+    };
+
+}
+
+
+function normalizeAddress(
+    address
+) {
+
+    return String(
+        address ||
+        ""
+    )
+        .toLowerCase()
+        .replace(
+            /[^a-z0-9]+/g,
+            " "
+        )
+        .trim()
+        .replace(
+            /\s+/g,
+            " "
+        );
+
+}
+
+
+function calculateLocationDistanceMeters(
+    a,
+    b
+) {
+
+    const aLat =
+        Number(
+            a?.latitude
+        );
+
+    const aLng =
+        Number(
+            a?.longitude
+        );
+
+    const bLat =
+        Number(
+            b?.latitude
+        );
+
+    const bLng =
+        Number(
+            b?.longitude
+        );
+
+
+    if (
+        [
+            aLat,
+            aLng,
+            bLat,
+            bLng
+        ]
+            .some(
+                (value) =>
+                    !Number.isFinite(
+                        value
+                    )
+            )
+    ) {
+
+        return null;
+
+    }
+
+
+    const toRadians =
+        (degrees) =>
+            degrees *
+            Math.PI /
+            180;
+
+
+    const lat1 =
+        toRadians(
+            aLat
+        );
+
+    const lat2 =
+        toRadians(
+            bLat
+        );
+
+    const dLat =
+        toRadians(
+            bLat -
+            aLat
+        );
+
+    const dLng =
+        toRadians(
+            bLng -
+            aLng
+        );
+
+
+    const haversine =
+        Math.sin(
+            dLat / 2
+        ) ** 2 +
+        Math.cos(
+            lat1
+        ) *
+        Math.cos(
+            lat2
+        ) *
+        Math.sin(
+            dLng / 2
+        ) ** 2;
+
+
+    return (
+        6371000 *
+        2 *
+        Math.atan2(
+            Math.sqrt(
+                haversine
+            ),
+            Math.sqrt(
+                1 -
+                haversine
+            )
+        )
+    );
+
+}
+
+
+function renderDuplicateAlert(
+    matches
+) {
+
+    if (
+        !duplicateAlert
+    ) {
+
+        return;
+
+    }
+
+
+    if (
+        !matches.length
+    ) {
+
+        duplicateAlert.classList.add(
+            "hidden"
+        );
+
+        duplicateAlert.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    const top =
+        matches[0];
+
+
+    duplicateAlert.classList.remove(
+        "hidden"
+    );
+
+
+    duplicateAlert.className =
+        "duplicate-alert duplicate-warning";
+
+
+    duplicateAlert.innerHTML = `
+
+        <div class="duplicate-alert-icon">
+            !
+        </div>
+
+        <div class="duplicate-alert-content">
+
+            <div class="duplicate-alert-head">
+
+                <div>
+
+                    <span class="result-label">
+                        REPEATED REPORT DETECTED
+                    </span>
+
+                    <h3>
+                        ${matches.length}
+                        potential duplicate${matches.length === 1 ? "" : "s"} found
+                    </h3>
+
+                </div>
+
+                <span class="duplicate-score">
+                    ${top.score}% match
+                </span>
+
+            </div>
+
+            <p>
+                The system found an earlier complaint with matching
+                image, issue and/or nearby location. You can still submit this
+                report; the authority portal will flag it for review.
+            </p>
+
+            <div class="duplicate-list">
+
+                ${matches.slice(0, 3).map(
+                    (match) => `
+                        <div class="duplicate-item">
+                            <strong>${escapeHTML(match.id)}</strong>
+                            <span>${escapeHTML(match.issue)}</span>
+                            <small>${escapeHTML(match.reason)}</small>
+                        </div>
+                    `
+                ).join("")}
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+
+
+function renderTrackedDuplicateInfo(
+    complaint
+) {
+
+    if (
+        !trackedDuplicateInfo
+    ) {
+
+        return;
+
+    }
+
+
+    const matches =
+        Array.isArray(
+            complaint.duplicateMatches
+        )
+            ? complaint.duplicateMatches
+            : [];
+
+
+    if (
+        !matches.length
+    ) {
+
+        trackedDuplicateInfo.classList.add(
+            "hidden"
+        );
+
+        trackedDuplicateInfo.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    trackedDuplicateInfo.classList.remove(
+        "hidden"
+    );
+
+
+    trackedDuplicateInfo.innerHTML = `
+
+        <div class="tracked-duplicate-head">
+
+            <span class="result-label">
+                DUPLICATE CHECK
+            </span>
+
+            <strong>
+                ${matches.length}
+                potential repeat${matches.length === 1 ? "" : "s"} detected
+            </strong>
+
+        </div>
+
+        <div class="tracked-duplicate-items">
+
+            ${matches.slice(0, 3).map(
+                (match) => `
+                    <div>
+                        <strong>
+                            ${escapeHTML(match.id)}
+                        </strong>
+                        <span>
+                            ${escapeHTML(match.issue || "Similar report")}
+                        </span>
+                        <small>
+                            ${escapeHTML(match.reason || "Matching report signals")}
+                        </small>
+                    </div>
+                `
+            ).join("")}
+
+        </div>
+
+    `;
+
+}
+
+
+function renderTrackedStatusHistory(
+    complaint
+) {
+
+    if (
+        !trackedStatusHistory
+    ) {
+
+        return;
+
+    }
+
+
+    const history =
+        Array.isArray(
+            complaint.statusHistory
+        )
+            ? complaint.statusHistory
+            : [];
+
+
+    if (
+        history.length <= 1
+    ) {
+
+        trackedStatusHistory.classList.add(
+            "hidden"
+        );
+
+        trackedStatusHistory.innerHTML =
+            "";
+
+        return;
+
+    }
+
+
+    trackedStatusHistory.classList.remove(
+        "hidden"
+    );
+
+
+    trackedStatusHistory.innerHTML = `
+
+        <div class="tracked-history-head">
+
+            <span class="result-label">
+                STATUS HISTORY
+            </span>
+
+            <span>
+                ${history.length} updates
+            </span>
+
+        </div>
+
+        <div class="tracked-history-list">
+
+            ${history.map(
+                (entry) => `
+                    <div class="tracked-history-item">
+                        <div>
+                            <strong>
+                                ${escapeHTML(entry.status)}
+                            </strong>
+                            <span>
+                                ${escapeHTML(entry.actor || "Authority")}
+                            </span>
+                        </div>
+                        <time>
+                            ${escapeHTML(formatDate(entry.time))}
+                        </time>
+                    </div>
+                `
+            ).reverse().join("")}
+
+        </div>
+
+    `;
+
+}
+
+
+/* =========================================================
+   AUTHORITY PORTAL
+========================================================= */
+
+function isAuthorityLoggedIn() {
+
+    return (
+        sessionStorage.getItem(
+            AUTH_SESSION_KEY
+        ) ===
+        "true"
+    );
+
+}
+
+
+function openAuthorityDashboard() {
+
+    authorityLoginView?.classList.add(
+        "hidden"
+    );
+
+    authorityDashboard?.classList.remove(
+        "hidden"
+    );
+
+
+    renderAuthorityDashboard();
+
+}
+
+
+function closeAuthorityDashboard() {
+
+    authorityLoginView?.classList.remove(
+        "hidden"
+    );
+
+    authorityDashboard?.classList.add(
+        "hidden"
+    );
+
+    if (
+        authorityPassword
+    ) {
+
+        authorityPassword.value =
+            "";
+
+    }
+
+}
+
+
+authorityLoginForm?.addEventListener(
+    "submit",
+    (event) => {
+
+        event.preventDefault();
+
+
+        const username =
+            authorityUsername.value.trim();
+
+        const password =
+            authorityPassword.value;
+
+
+        if (
+            username ===
+                AUTH_CREDENTIALS.username &&
+            password ===
+                AUTH_CREDENTIALS.password
+        ) {
+
+            sessionStorage.setItem(
+                AUTH_SESSION_KEY,
+                "true"
+            );
+
+
+            authorityLoginError.classList.add(
+                "hidden"
+            );
+
+
+            openAuthorityDashboard();
+
+        } else {
+
+            authorityLoginError.classList.remove(
+                "hidden"
+            );
+
+
+            authorityPassword.value =
+                "";
+
+
+            authorityPassword.focus();
+
+        }
+
+    }
+);
+
+
+authorityLogoutButton?.addEventListener(
+    "click",
+    () => {
+
+        sessionStorage.removeItem(
+            AUTH_SESSION_KEY
+        );
+
+
+        closeAuthorityDashboard();
+
+    }
+);
+
+
+authoritySearch?.addEventListener(
+    "input",
+    renderAuthorityDashboard
+);
+
+
+authorityStatusFilter?.addEventListener(
+    "change",
+    renderAuthorityDashboard
+);
+
+
+function renderAuthorityDashboard() {
+
+    if (
+        !isAuthorityLoggedIn()
+    ) {
+
+        return;
+
+    }
+
+
+    const complaints =
+        Object
+            .values(
+                getComplaints()
+            )
+            .sort(
+                (a, b) =>
+                    b.createdAt -
+                    a.createdAt
+            );
+
+
+    const query =
+        authoritySearch?.value
+            .trim()
+            .toLowerCase() ||
+        "";
+
+
+    const statusFilter =
+        authorityStatusFilter?.value ||
+        "All";
+
+
+    const filtered =
+        complaints.filter(
+            (complaint) => {
+
+                const haystack = [
+                    complaint.id,
+                    complaint.issue,
+                    complaint.category,
+                    complaint.department,
+                    normalizeLocationForDisplay(
+                        complaint.location
+                    )
+                ]
+                    .join(" ")
+                    .toLowerCase();
+
+
+                const matchesQuery =
+                    !query ||
+                    haystack.includes(
+                        query
+                    );
+
+
+                const matchesStatus =
+                    statusFilter ===
+                        "All" ||
+                    complaint.status ===
+                        statusFilter;
+
+
+                return (
+                    matchesQuery &&
+                    matchesStatus
+                );
+
+            }
+        );
+
+
+    renderAuthorityStats(
+        complaints
+    );
+
+
+    authorityResultsCount.textContent =
+        `${filtered.length} report${filtered.length === 1 ? "" : "s"}`;
+
+
+    authorityComplaintList.innerHTML =
+        "";
+
+
+    authorityEmpty.classList.toggle(
+        "hidden",
+        filtered.length > 0
+    );
+
+
+    filtered.forEach(
+        (complaint) => {
+
+            authorityComplaintList.appendChild(
+                createAuthorityComplaintCard(
+                    complaint
+                )
+            );
+
+        }
+    );
+
+}
+
+
+function renderAuthorityStats(
+    complaints
+) {
+
+    const count =
+        (status) =>
+            complaints.filter(
+                (complaint) =>
+                    complaint.status ===
+                    status
+            ).length;
+
+
+    const duplicateCount =
+        complaints.filter(
+            (complaint) =>
+                complaint.hasPotentialDuplicate
+        ).length;
+
+
+    const stats = [
+
+        [
+            "Total reports",
+            complaints.length,
+            "↗"
+        ],
+
+        [
+            "Under review",
+            count("Under Review"),
+            "◌"
+        ],
+
+        [
+            "In progress",
+            count("In Progress"),
+            "→"
+        ],
+
+        [
+            "Resolved",
+            count("Resolved"),
+            "✓"
+        ],
+
+        [
+            "Potential repeats",
+            duplicateCount,
+            "!"
+        ]
+
+    ];
+
+
+    authorityStats.innerHTML =
+        stats
+            .map(
+                ([label, value, icon]) => `
+                    <div class="authority-stat">
+                        <span>${escapeHTML(icon)}</span>
+                        <strong>${value}</strong>
+                        <small>${escapeHTML(label)}</small>
+                    </div>
+                `
+            )
+            .join("");
+
+}
+
+
+function createAuthorityComplaintCard(
+    complaint
+) {
+
+    const wrapper =
+        document.createElement(
+            "article"
+        );
+
+
+    wrapper.className =
+        "authority-complaint-card";
+
+
+    const duplicateText =
+        complaint.hasPotentialDuplicate
+            ? `${complaint.duplicateMatches?.length || 1} potential repeat${
+                (complaint.duplicateMatches?.length || 1) === 1
+                    ? ""
+                    : "s"
+              }`
+            : "No duplicate flag";
+
+
+    wrapper.innerHTML = `
+
+        <div class="authority-complaint-main">
+
+            <div class="authority-complaint-head">
+
+                <div>
+
+                    <span class="result-label">
+                        ${escapeHTML(complaint.id)}
+                    </span>
+
+                    <h4>
+                        ${escapeHTML(complaint.issue)}
+                    </h4>
+
+                </div>
+
+                <span
+                    class="status-pill status-${escapeHTML(
+                        complaint.status
+                            .toLowerCase()
+                            .replace(/\s+/g, "-")
+                    )}"
+                >
+                    ${escapeHTML(complaint.status)}
+                </span>
+
+            </div>
+
+
+            <div class="authority-complaint-grid">
+
+                <div>
+                    <span>Department</span>
+                    <strong>${escapeHTML(complaint.department)}</strong>
+                </div>
+
+                <div>
+                    <span>Location</span>
+                    <strong>${escapeHTML(
+                        normalizeLocationForDisplay(
+                            complaint.location
+                        )
+                    )}</strong>
+                </div>
+
+                <div>
+                    <span>Created</span>
+                    <strong>${escapeHTML(
+                        formatDate(
+                            complaint.createdAt
+                        )
+                    )}</strong>
+                </div>
+
+                <div>
+                    <span>Duplicate detection</span>
+                    <strong class="${
+                        complaint.hasPotentialDuplicate
+                            ? "duplicate-inline"
+                            : ""
+                    }">
+                        ${escapeHTML(duplicateText)}
+                    </strong>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="authority-complaint-actions">
+
+            <label>
+                Update status
+                <select
+                    class="authority-status-select"
+                    data-complaint-id="${escapeHTML(complaint.id)}"
+                >
+                    ${AUTHORITY_STATUSES.map(
+                        (status) => `
+                            <option
+                                value="${escapeHTML(status)}"
+                                ${status === complaint.status ? "selected" : ""}
+                            >
+                                ${escapeHTML(status)}
+                            </option>
+                        `
+                    ).join("")}
+                </select>
+            </label>
+
+            <button
+                type="button"
+                class="button button-light authority-track-button"
+                data-track-id="${escapeHTML(complaint.id)}"
+            >
+                Open tracker
+            </button>
+
+        </div>
+
+    `;
+
+
+    wrapper
+        .querySelector(
+            ".authority-status-select"
+        )
+        ?.addEventListener(
+            "change",
+            (event) => {
+
+                updateComplaintStatus(
+                    complaint.id,
+                    event.target.value
+                );
+
+            }
+        );
+
+
+    wrapper
+        .querySelector(
+            ".authority-track-button"
+        )
+        ?.addEventListener(
+            "click",
+            () => {
+
+                trackInput.value =
+                    complaint.id;
+
+                trackComplaint();
+
+                document
+                    .getElementById(
+                        "track"
+                    )
+                    ?.scrollIntoView({
+                        behavior: "smooth"
+                    });
+
+            }
+        );
+
+
+    return wrapper;
+
+}
+
+
+function updateComplaintStatus(
+    id,
+    nextStatus
+) {
+
+    if (
+        !AUTHORITY_STATUSES.includes(
+            nextStatus
+        )
+    ) {
+
+        return;
+
+    }
+
+
+    const complaints =
+        getComplaints();
+
+
+    const complaint =
+        complaints[id];
+
+
+    if (
+        !complaint
+    ) {
+
+        return;
+
+    }
+
+
+    const previousStatus =
+        complaint.status;
+
+
+    if (
+        previousStatus ===
+        nextStatus
+    ) {
+
+        return;
+
+    }
+
+
+    const now =
+        Date.now();
+
+
+    complaint.status =
+        nextStatus;
+
+
+    if (
+        !Array.isArray(
+            complaint.statusHistory
+        )
+    ) {
+
+        complaint.statusHistory =
+            [];
+
+    }
+
+
+    complaint.statusHistory.push({
+        status:
+            nextStatus,
+
+        time:
+            now,
+
+        actor:
+            "Authority"
+    });
+
+
+    syncComplaintTimeline(
+        complaint
+    );
+
+
+    complaint.updatedAt =
+        now;
+
+
+    complaints[id] =
+        complaint;
+
+
+    saveComplaints(
+        complaints
+    );
+
+
+    renderAuthorityDashboard();
+
+
+    if (
+        trackInput.value
+            .trim()
+            .toUpperCase() ===
+        id.toUpperCase()
+    ) {
+
+        renderTrackedComplaint(
+            complaint
+        );
+
+    }
+
+
+    showAuthorityToast(
+        `${id} moved from ${previousStatus} to ${nextStatus}.`
+    );
+
+}
+
+
+function syncComplaintTimeline(
+    complaint
+) {
+
+    const timeline =
+        Array.isArray(
+            complaint.timeline
+        )
+            ? complaint.timeline
+            : createDefaultTimeline(
+                complaint.createdAt,
+                complaint.department
+            );
+
+
+    while (
+        timeline.length <
+        4
+    ) {
+
+        timeline.push(
+            {
+                title:
+                    "",
+                description:
+                    "",
+                time:
+                    null,
+                done:
+                    false
+            }
+        );
+
+    }
+
+
+    const stage =
+        STATUS_STAGE[
+            complaint.status
+        ] ?? 0;
+
+
+    timeline[0].done =
+        true;
+
+
+    timeline[1].done =
+        stage >= 1;
+
+    timeline[2].done =
+        stage >= 3;
+
+    timeline[3].done =
+        stage >= 4;
+
+
+    const history =
+        complaint.statusHistory || [];
+
+
+    const findTime =
+        (statusNames) => {
+
+            const entry =
+                [...history]
+                    .reverse()
+                    .find(
+                        (item) =>
+                            statusNames.includes(
+                                item.status
+                            )
+                    );
+
+            return entry?.time ||
+                null;
+
+        };
+
+
+    timeline[1].time =
+        findTime([
+            "Under Review",
+            "Assigned",
+            "In Progress",
+            "Resolved",
+            "Rejected"
+        ]);
+
+    timeline[2].time =
+        findTime([
+            "In Progress",
+            "Resolved"
+        ]);
+
+    timeline[3].time =
+        findTime([
+            "Resolved"
+        ]);
+
+
+    if (
+        complaint.status ===
+        "Rejected"
+    ) {
+
+        timeline[2].title =
+            "Authority review outcome";
+
+        timeline[2].description =
+            "The report was reviewed and marked as rejected.";
+
+        timeline[2].done =
+            true;
+
+        timeline[2].time =
+            findTime([
+                "Rejected"
+            ]);
+
+    } else {
+
+        timeline[2].title =
+            "Action in progress";
+
+        timeline[2].description =
+            "Updates will appear here when the report progresses.";
+
+    }
+
+
+    timeline[3].title =
+        "Resolved";
+
+    timeline[3].description =
+        "The civic issue has been marked as resolved.";
+
+
+    complaint.timeline =
+        timeline;
+
+}
+
+
+function showAuthorityToast(
+    message
+) {
+
+    let toast =
+        document.getElementById(
+            "authorityToast"
+        );
+
+
+    if (!toast) {
+
+        toast =
+            document.createElement(
+                "div"
+            );
+
+        toast.id =
+            "authorityToast";
+
+        toast.className =
+            "authority-toast";
+
+        document.body.appendChild(
+            toast
+        );
+
+    }
+
+
+    toast.textContent =
+        message;
+
+
+    requestAnimationFrame(
+        () => {
+            toast.classList.add(
+                "show"
+            );
+        }
+    );
+
+
+    setTimeout(
+        () => {
+            toast.classList.remove(
+                "show"
+            );
+        },
+        2600
+    );
+
+}
+
+
+/* =========================================================
+   HOOK NEW FEATURES INTO EXISTING LOCATION FLOW
+========================================================= */
+
+/*
+    Existing GPS/manual-location logic remains intact. The hooks below
+    only run the duplicate detector once an analysis and a location
+    are both available.
+*/
+
+const originalSaveManualLocation =
+    saveManualLocation;
+
+const originalGetLocation =
+    getLocation;
+
+
+/*
+    The named function declarations above already own the existing
+    handlers. Rebind the location buttons so we can refresh the
+    duplicate detector after the original function completes.
+*/
+
+getGpsButton?.removeEventListener(
+    "click",
+    getLocation
+);
+
+getGpsButton?.addEventListener(
+    "click",
+    () => {
+
+        originalGetLocation();
+
+        setTimeout(
+            refreshDuplicateDetection,
+            120
+        );
+
+    }
+);
+
+
+saveManualLocationButton?.removeEventListener(
+    "click",
+    saveManualLocation
+);
+
+saveManualLocationButton?.addEventListener(
+    "click",
+    () => {
+
+        originalSaveManualLocation();
+
+        setTimeout(
+            refreshDuplicateDetection,
+            60
+        );
+
+    }
+);
+
+
+window.addEventListener(
+    "storage",
+    (event) => {
+
+        if (
+            event.key ===
+            STORAGE_KEY
+        ) {
+
+            if (
+                isAuthorityLoggedIn()
+            ) {
+
+                renderAuthorityDashboard();
+
+            }
+
+
+            const currentId =
+                trackInput?.value
+                    .trim()
+                    .toUpperCase();
+
+
+            if (
+                currentId
+            ) {
+
+                const complaints =
+                    getComplaints();
+
+
+                if (
+                    complaints[currentId]
+                ) {
+
+                    renderTrackedComplaint(
+                        complaints[currentId]
+                    );
+
+                }
+
+            }
+
+        }
+
+    }
+);
+
+
+/* =========================================================
+   RESTORE AUTHORITY SESSION
+========================================================= */
+
+if (
+    isAuthorityLoggedIn()
+) {
+
+    openAuthorityDashboard();
+
+}
+
+
+/* =========================================================
+   UPDATED CONSOLE DIAGNOSTICS
+========================================================= */
+
+console.log(
+    "Metadata inspection: EXIF/XMP/provenance heuristics enabled."
+);
+
+console.log(
+    "Duplicate detection: file hash + issue/location similarity enabled."
+);
+
+console.log(
+    "Authority portal: browser-only demo authentication and status workflow enabled."
 );
